@@ -1,1 +1,1 @@
-HOSTNAME=$(cat /etc/hostname)
+yourhostname.dynv6.net
