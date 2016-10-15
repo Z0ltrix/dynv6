@@ -1,0 +1,4 @@
+# /etc/default/dynv6
+
+# Change to one to enable dynv6
+ENABLED=1
