@@ -1,3 +1,2 @@
-DEVICE=$(cat /etc/dynv6/device)
-HOSTNAME=$(cat /etc/dynv6/hostname)
-TOKEN=$(cat /etc/dynv6/token)
+# /etc/dynv6/config
+# if you dont want to change the defaults, this file should be empty
