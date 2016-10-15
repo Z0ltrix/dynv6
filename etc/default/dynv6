@@ -1,4 +1,14 @@
 # /etc/default/dynv6
-
+NETMASK=128
+DEVICE="dev"
+test -f /etc/dynv6/device && DEVICE=$(cat /etc/dynv6/device)
+HOSTNAME="host"
+test -f /etc/dynv6/hostname && HOSTNAME=$(cat /etc/dynv6/hostname)
+TOKEN="token"
+test -f /etc/dynv6/token && TOKEN=$(cat /etc/dynv6/token)
+LOGDIR=/var/log/dynv6
+LOGFILE=$LOGDIR/$HOSTNAME.log
+TMPDIR=/tmp/dynv6
+ADDR6FILE=$TMPDIR/.dynv6.addr6
 # Change to one to enable dynv6
 ENABLED=1
