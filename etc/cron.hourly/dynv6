@@ -1,4 +1,4 @@
-# /etc/cron.hourly/dynv6
+#!/bin/sh
 
 # test various files
 test -f /etc/default/dynv6 && . /etc/default/dynv6
