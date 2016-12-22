@@ -22,11 +22,6 @@ if ! [ -d $TMPDIR ] ; then
         mkdir -p $TMPDIR
 fi
 
-# test if addr6file exist
-if [ -e $ADDR6FILE ] ; then
-        OLD=`cat $ADDR6FILE`
-fi
-
 # test if hostname or token is set, if not exit with failure
 if [ -z "$HOSTNAME" -o -z "$TOKEN" ]; then
   echo "$TIMESTAMP: cant find token or hostname" >> $LOGFILE
@@ -34,6 +29,12 @@ if [ -z "$HOSTNAME" -o -z "$TOKEN" ]; then
 fi
 
 ADDRESS=$(ip -6 addr list scope global $DEVICE | grep -v " fd" | sed -n 's/.*inet6 \([0-9a-f:]\+\).*/\1/p' | head -n 1)
+
+# test if IPv6 address could be found, if not exit with failure
+if [ -z "$ADDRESS" ]; then
+  echo "$TIMESTAMP: no IPv6 address found" >> $LOGFILE
+  exit 1
+fi
 
 if [ -e /usr/bin/curl ]; then
   BIN="curl -fsS"
@@ -44,17 +45,18 @@ else
   exit 1
 fi
 
-if [ -z "$ADDRESS" ]; then
-  echo "$TIMESTAMP: no IPv6 address found" >> $LOGFILE
-  exit 1
-fi
-
-# address with netmask
+# current address with netmask
 CURRENT=$ADDRESS/$NETMASK
 
+# test if addr6file exist
+if [ -e $ADDR6FILE ] ; then
+        OLD=$(cat $ADDR6FILE)
+fi
+
+# test if IPv6 address has changed, if not exit
 if [ "$OLD" = "$CURRENT" ]; then
   echo "$TIMESTAMP: IPv6 address unchanged (old=$OLD - current=$CURRENT)" >> $LOGFILE
-  exit
+  exit 0
 fi
 
 # send addresses to dynv6
