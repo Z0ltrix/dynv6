@@ -1,8 +1,8 @@
 # /etc/default/dynv6
 NETMASK=128
-DEVICE="dev"
+DEVICE="eth0"
 test -f /etc/dynv6/device && DEVICE=$(cat /etc/dynv6/device)
-HOSTNAME="host"
+HOSTNAME="yourhostname.dynv6.net"
 test -f /etc/dynv6/hostname && HOSTNAME=$(cat /etc/dynv6/hostname)
 TOKEN="token"
 test -f /etc/dynv6/token && TOKEN=$(cat /etc/dynv6/token)
