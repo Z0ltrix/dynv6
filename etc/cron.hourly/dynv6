@@ -1,3 +1,5 @@
+# /etc/cron.hourly/dynv6
+
 # test various files
 test -f /etc/default/dynv6 && . /etc/default/dynv6
 test -f /etc/dynv6/config && . /etc/dynv6/config
