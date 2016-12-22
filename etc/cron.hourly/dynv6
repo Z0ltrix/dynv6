@@ -4,7 +4,7 @@
 test -f /etc/default/dynv6 && . /etc/default/dynv6
 test -f /etc/dynv6/config && . /etc/dynv6/config
 
-# check if dynv6 is enabled
+# check if dynv6 is enabled, if not exit
 if [ "$ENABLED" = "0" ] ; then
     exit 0
 fi
@@ -22,41 +22,45 @@ if ! [ -d $TMPDIR ] ; then
         mkdir -p $TMPDIR
 fi
 
-[ -e $ADDR6FILE ] && OLD=`cat $ADDR6FILE`
+# test if addr6file exist
+if [ -e $ADDR6FILE ] ; then
+        OLD=`cat $ADDR6FILE`
+fi
 
+# test if hostname or token is set, if not exit with failure
 if [ -z "$HOSTNAME" -o -z "$TOKEN" ]; then
-  echo "$TIMESTAMP: cant find token or hostname" >> $LOG
+  echo "$TIMESTAMP: cant find token or hostname" >> $LOGFILE
   exit 1
 fi
 
-address=$(ip -6 addr list scope global $device | grep -v " fd" | sed -n 's/.*inet6 \([0-9a-f:]\+\).*/\1/p' | head -n 1)
+ADDRESS=$(ip -6 addr list scope global $DEVICE | grep -v " fd" | sed -n 's/.*inet6 \([0-9a-f:]\+\).*/\1/p' | head -n 1)
 
 if [ -e /usr/bin/curl ]; then
-  bin="curl -fsS"
+  BIN="curl -fsS"
 elif [ -e /usr/bin/wget ]; then
-  bin="wget -O-"
+  BIN="wget -O-"
 else
-  echo "$ts: neither curl nor wget found" >> $log
+  echo "$TIMESTAMP: neither curl nor wget found" >> $LOGFILE
   exit 1
 fi
 
-if [ -z "$address" ]; then
-  echo "$ts: no IPv6 address found" >> $log
+if [ -z "$ADDRESS" ]; then
+  echo "$TIMESTAMP: no IPv6 address found" >> $LOGFILE
   exit 1
 fi
 
 # address with netmask
-CURRENT=$address/$NETMASK
+CURRENT=$ADDRESS/$NETMASK
 
-if [ "$OLD" = "$current" ]; then
-  echo "$ts: IPv6 address unchanged" >> $log
+if [ "$OLD" = "$CURRENT" ]; then
+  echo "$TIMESTAMP: IPv6 address unchanged (old=$OLD - current=$CURRENT)" >> $LOGFILE
   exit
 fi
 
 # send addresses to dynv6
-$bin "http://dynv6.com/api/update?hostname=$HOSTNAME&ipv6=$CURRENT&token=$TOKEN"
-$bin "http://ipv4.dynv6.com/api/update?hostname=$HOSTNAME&ipv4=auto&token=$TOKEN"
+$BIN "http://dynv6.com/api/update?hostname=$HOSTNAME&ipv6=$CURRENT&token=$TOKEN"
+$BIN "http://ipv4.dynv6.com/api/update?hostname=$HOSTNAME&ipv4=auto&token=$TOKEN"
 
 # save current address
-echo $CURRENT > $FILE
-echo "$TIMESTAMP: update successful: $CURRENT" >> $LOG
+echo $CURRENT > $ADDR6FILE
+echo "$TIMESTAMP: update successful: $CURRENT" >> $LOGFILE
