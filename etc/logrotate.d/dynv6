@@ -1,0 +1,7 @@
+# /etc/logrotate.d/dynv6
+/var/log/dynv6/*log { 
+        compress
+        size 100k
+        rotate 5
+        missingok
+}
