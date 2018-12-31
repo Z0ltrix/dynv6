@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# test various files
+test -f /etc/default/dynv6 && . /etc/default/dynv6
+test -f /etc/dynv6/config && . /etc/dynv6/config
+
+# check if dynv6 is enabled, if not exit
+if [ "$ENABLED" = "0" ] ; then
+    exit 0
+fi
+
+# set timestamp
+TIMESTAMP=$(date +"%H:%M:%S - %d.%m.%Y")
+
+# test if log-folder exist, if not create it
+if ! [ -d $LOGDIR ] ; then
+        mkdir -p $LOGDIR
+fi
+
+# test if tmp-folder exist, if not create it
+if ! [ -d $TMPDIR ] ; then
+        mkdir -p $TMPDIR
+fi
+
+# test if hostname or token is set, if not exit with failure
+if [ -z "$HOSTNAME" -o -z "$TOKEN" ]; then
+  echo "$TIMESTAMP: cant find token or hostname" >> $LOGFILE
+  exit 1
+fi
+
+ADDRESS=$(ip -6 addr list scope global $DEVICE | grep -v " temporary" | sed -n 's/.*inet6 \([0-9a-f:]\+\).*/\1/p' | head -n 1)
+
+# test if IPv6 address could be found, if not exit with failure
+if [ -z "$ADDRESS" ]; then
+  echo "$TIMESTAMP: no IPv6 address found" >> $LOGFILE
+  exit 1
+fi
+
+if [ -e /usr/bin/curl ]; then
+  BIN="curl -fsS"
+elif [ -e /usr/bin/wget ]; then
+  BIN="wget -O-"
+else
+  echo "$TIMESTAMP: neither curl nor wget found" >> $LOGFILE
+  exit 1
+fi
+
+# current address with netmask
+CURRENT=$ADDRESS/$NETMASK
+
+# test if addr6file exist
+if [ -e $ADDR6FILE ] ; then
+        OLD=$(cat $ADDR6FILE)
+fi
+
+# test if IPv6 address has changed, if not exit
+if [ "$OLD" = "$CURRENT" ]; then
+  echo "$TIMESTAMP: IPv6 address unchanged (old=$OLD - current=$CURRENT)" >> $LOGFILE
+  exit 0
+fi
+
+# send addresses to dynv6
+$BIN "http://dynv6.com/api/update?hostname=$HOSTNAME&ipv6=$CURRENT&token=$TOKEN"
+$BIN "http://ipv4.dynv6.com/api/update?hostname=$HOSTNAME&ipv4=auto&token=$TOKEN"
+
+# save current address
+echo $CURRENT > $ADDR6FILE
+echo "$TIMESTAMP: update successful: $CURRENT" >> $LOGFILE

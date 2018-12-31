@@ -1,0 +1,8 @@
+[Unit]
+Description=DynV6 Service
+Requires=network.target
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/dynv6
+Type=simple

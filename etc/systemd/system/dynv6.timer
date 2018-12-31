@@ -1,0 +1,9 @@
+[Unit]
+Description=Run dynv6 hourly
+
+[Timer]
+OnCalendar=hourly
+Unit=dynv6.service
+
+[Install]
+WantedBy=timers.target
