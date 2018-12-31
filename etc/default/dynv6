@@ -11,4 +11,4 @@ LOGFILE=$LOGDIR/$HOSTNAME.log
 TMPDIR=/tmp/dynv6
 ADDR6FILE=$TMPDIR/.dynv6.addr6
 # Change to one to enable dynv6
-ENABLED=0
+ENABLED=1
